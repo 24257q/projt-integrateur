@@ -115,12 +115,96 @@ async function main() {
       category: "Contact",
       language: "fr"
     },
+    {
+      question: "Quelles certifications peut-on obtenir à SupNum ?",
+      answer: "Les étudiants peuvent préparer des certifications reconnues internationalement comme Cisco CCNA, Huawei HCIA, et diverses certifications Microsoft et Linux (LPI).",
+      category: "Certification",
+      language: "fr"
+    },
+    {
+      question: "Est-ce qu'il y a des programmes de Master à SupNum ?",
+      answer: "Oui, SupNum propose des Masters spécialisés en Cybersécurité, Big Data & IA, et Management des Systèmes d'Information.",
+      category: "Formation",
+      language: "fr"
+    },
+    {
+      question: "Quelles sont les infrastructures technologiques du campus ?",
+      answer: "Le campus dispose de laboratoires de pointe, d'une salle de serveurs dédiée pour les TP de réseaux, d'un espace de coworking et d'une connexion internet haut débit.",
+      category: "Infrastructure",
+      language: "fr"
+    },
+    {
+      question: "Quels sont les horaires d'ouverture de l'institut ?",
+      answer: "L'administration est ouverte du lundi au jeudi de 8h00 à 17h00, et le vendredi de 8h00 à 12h00. Les cours peuvent s'étendre jusqu'à 18h00.",
+      category: "Infos Pratiques",
+      language: "fr"
+    },
+    {
+      question: "SupNum propose-t-il des formations à distance ?",
+      answer: "Certains modules sont hybrides (mixte présentiel et distanciel), mais la majorité de la formation technique nécessite une présence physique pour les travaux pratiques.",
+      category: "Modalité",
+      language: "fr"
+    },
+    {
+      question: "Y a-t-il un réseau d'anciens élèves (Alumni) ?",
+      answer: "Oui, l'association des anciens élèves de SupNum aide les nouveaux diplômés à s'insérer dans le marché du travail via du mentorat et des offres d'emploi exclusives.",
+      category: "Carrière",
+      language: "fr"
+    },
+    {
+      question: "Quels sont les clubs étudiants les plus actifs ?",
+      answer: "Le club de Robotique, le club de Cybersécurité (CTF), et le club de Design Multimédia sont très dynamiques et organisent régulièrement des événements.",
+      category: "Vie étudiante",
+      language: "fr"
+    },
 
     // --- ARABIC ---
     {
       question: "ما هو المعهد العالي للرقمنة (SupNum)؟",
       answer: "المعهد العالي للرقمنة (SupNum) هو مؤسسة عمومية تتبع لوزارة التعليم العالي والبحث العلمي، تم إنشاؤه بمرسوم رقم 2021-208. يهدف إلى تكوين مهندسين وتقنيين متخصصين في الرقمنة.",
       category: "التعريف",
+      language: "ar"
+    },
+    {
+      question: "ما هي الشهادات الدولية التي يمكن الحصول عليها؟",
+      answer: "يمكن للطلاب التحضير لشهادات معترف بها دوليًا مثل Cisco CCNA و Huawei HCIA وشهادات Microsoft و Linux المختلفة.",
+      category: "الشهادات",
+      language: "ar"
+    },
+    {
+      question: "هل يوفر المعهد برامج ماستر؟",
+      answer: "نعم، يقدم المعهد برامج ماستر متخصصة في الأمن السيبراني (Cybersécurité) والبيانات الضخمة والذكاء الاصطناعي (Big Data & IA).",
+      category: "التكوين",
+      language: "ar"
+    },
+    {
+      question: "ما هي البنية التحتية التكنولوجية للمعهد؟",
+      answer: "يضم المعهد مختبرات متطورة، غرفة خوادم مخصصة للتطبيقات العملية، مساحات عمل مشتركة، واتصال إنترنت عالي السرعة.",
+      category: "البنية التحتية",
+      language: "ar"
+    },
+    {
+      question: "ما هي أوقات الدوام الرسمي؟",
+      answer: "تفتح الإدارة من الاثنين إلى الخميس من الساعة 8:00 صباحًا حتى 5:00 مساءً، والجمعة من 8:00 صباحًا حتى 12:00 ظهرًا.",
+      category: "معلومات",
+      language: "ar"
+    },
+    {
+      question: "هل يوجد تكوين عن بعد؟",
+      answer: "بعض المواد تُدرس بنظام هجين، لكن التكوين التقني يتطلب حضوراً شخصياً للأعمال التطبيقية (TP).",
+      category: "التعليم",
+      language: "ar"
+    },
+    {
+      question: "هل توجد جمعية للخريجين؟",
+      answer: "نعم، تساعد جمعية خريجي SupNum الخريجين الجدد في الاندماج في سوق العمل من خلال التوجيه وفرص العمل الحصرية.",
+      category: "المسار المهني",
+      language: "ar"
+    },
+    {
+      question: "ما هي الأندية الطلابية الأكثر نشاطاً؟",
+      answer: "نادي الروبوتات، نادي الأمن السيبراني، ونادي التصميم الجرافيكي هي من أكثر الأندية نشاطاً في المعهد.",
+      category: "الحياة الطلابية",
       language: "ar"
     },
     {

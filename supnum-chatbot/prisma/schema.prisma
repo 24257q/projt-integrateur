@@ -21,6 +21,8 @@ model Conversation {
   id          Int      @id @default(autoincrement())
   userMessage String
   botResponse String?
+  language    String   @default("fr")
+  isNoInfo    Boolean  @default(false)
   createdAt   DateTime @default(now())
 }
 

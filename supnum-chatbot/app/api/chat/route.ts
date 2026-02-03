@@ -14,7 +14,43 @@ const getOpenAIClient = () => {
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { message, language = 'fr' } = body;
+        const { message } = body;
+
+        // Automatic Language Detection
+        const hasArabic = /[\u0600-\u06FF]/.test(message);
+        const language = hasArabic ? 'ar' : 'fr';
+
+        const greetings = ['hello', 'hi', 'bonjour', 'salut', 'coucou', 'مرحبا', 'أهلا', 'السلام عليكم', 'سلام'];
+        const lowerMessage = message.toLowerCase().trim();
+
+        if (greetings.some(g => lowerMessage === g || lowerMessage === g + ' !' || lowerMessage === g + '?')) {
+            const funnyResponsesFr = [
+                "Salut ! 👋 Prêt à devenir le prochain génie du numérique en Mauritanie ? Je suis là pour t'aider !",
+                "Bonjour ! Si j'avais des mains, je te ferais un high-five ✋. En attendant, que puis-je faire pour toi ?",
+                "Salut ! Je suis en pleine forme numérique aujourd'hui. Et toi, prêt à coder le futur ? 🤖"
+            ];
+            const funnyResponsesAr = [
+                "أهلاً بك! 👋 هل أنت مستعد لتكون العبقري الرقمي القادم في موريتانيا؟ أنا هنا لمساعدتك!",
+                "مرحباً! لو كان لدي يدان لصافحتك ✋. كيف يمكنني مساعدتك اليوم؟",
+                "أهلاً! أنا في قمة نشاطي الرقمي اليوم. هل أنت مستعد لبرمجة المستقبل؟ 🤖"
+            ];
+
+            const responses = language === 'ar' ? funnyResponsesAr : funnyResponsesFr;
+            const responseText = responses[Math.floor(Math.random() * responses.length)];
+
+            // Log the funny greeting too
+            await prisma.conversation.create({
+                data: {
+                    userMessage: message,
+                    botResponse: responseText,
+                    language: language,
+                    isNoInfo: false,
+                },
+            });
+
+            return NextResponse.json({ response: responseText, language });
+        }
+
         console.log('Chat API Request:', { message, language });
 
         if (!message) {
@@ -32,27 +68,38 @@ export async function POST(req: Request) {
 
         const context = faqs.map((f: { question: string; answer: string }) => `Q: ${f.question}\nA: ${f.answer}`).join('\n\n');
 
-        const noInfoMsg = language === 'ar'
-            ? "ليس لدي هذه المعلومات. يرجى الاتصال بإدارة SupNum."
-            : "Je n’ai pas cette information. Veuillez contacter l’administration de SupNum.";
+        const noInfoMsgAr = "ليس لدي هذه المعلومات. يرجى الاتصال بإدارة SupNum.";
+        const noInfoMsgFr = "Je n'ai pas cette information. Veuillez contacter l'administration de SupNum.";
+        const noInfoMsg = language === 'ar' ? noInfoMsgAr : noInfoMsgFr;
+
+        const generalKnowledge = `
+IDENTITÉ : Institut Supérieur du Numérique (SupNum).
+MISSION : Former des experts en numérique (Développement, Réseaux, Sécurité, Multimédia).
+LOCALISATION : Tevragh-Zeina, Nouakchott, Mauritanie.
+CONTACTS : Tél: +222 45 24 45 44 | Email: contact@supnum.mr | Site: supnum.mr
+ADMISSION : Bacheliers séries C ou D, sélection via plateforme nationale.
+FRAIS : Établissement public, les formations sont GRATUITES.
+FILIÈRES : DSI (Développement), RSS (Réseaux & Sécurité), DWM (Développement Web & Multimédia).
+`;
 
         // 2. Prepare System Prompt based on strict rules
         const systemPrompt = `
-Tu es un chatbot officiel de l’Institut Supérieur du Numérique (SupNum).
+Tu es l'assistant IA officiel de SupNum. 
+Utilise les informations suivantes pour répondre :
 
-Règles strictes :
-- Tu dois répondre UNIQUEMENT à partir des informations fournies dans le CONTEXTE ci-dessous.
-- Si l’information n’existe pas dans le contexte, réponds EXACTEMENT : "${noInfoMsg}"
-- Ne donne jamais d’informations inventées.
-- Réponds dans la langue utilisée par l’utilisateur (${language === 'ar' ? 'arabe' : 'français'}).
-- Sois clair, professionnel et concis.
-- Si la question est complexe, propose une redirection vers un agent humain.
+CONNAISSANCES GÉNÉRALES :
+${generalKnowledge}
 
-Rôle :
-Fournir des informations sur : Formations, Inscriptions, Conditions d’admission, Débouchés, Contacts et horaires.
+CONTEXTE DÉTAILLÉ (FAQ) :
+${context || 'Pas de questions spécifiques trouvées.'}
 
-CONTEXTE :
-${context || 'Aucune information disponible pour le moment.'}
+Règles de réponse :
+1. Utilise d'abord le CONTEXTE DÉTAILLÉ pour répondre précisément.
+2. Si la réponse n'est pas dans le contexte détaillé, utilise les CONNAISSANCES GÉNÉRALES.
+3. Si l'information est totalement absente des deux, réponds UNIQUEMENT : "${noInfoMsg}"
+4. Réponds toujours en ${language === 'ar' ? 'Arabe' : 'Français'}.
+5. Ne mentionne pas de dates de concours sauf si spécifiées dans le contexte.
+6. Sois professionnel, accueillant et institutionnel.
 `;
 
         let responseText = "";
@@ -76,14 +123,19 @@ ${context || 'Aucune information disponible pour le moment.'}
 
         // Fallback logic if AI failed or client not available
         if (!responseText) {
-            const keywords = message.toLowerCase().split(' ').filter((w: string) => w.length > 2);
+            // Robust keyword matching
+            const userWords = message.toLowerCase()
+                .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?'"]/g, " ")
+                .split(' ')
+                .filter((w: string) => w.length > 1);
+
             let bestMatch = null;
             let maxScore = 0;
 
             for (const faq of faqs) {
                 let score = 0;
-                const questionWords = faq.question.toLowerCase();
-                for (const word of keywords) {
+                const questionWords = faq.question.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?'"]/g, " ");
+                for (const word of userWords) {
                     if (questionWords.includes(word)) score++;
                 }
                 if (score > maxScore) {
@@ -92,7 +144,7 @@ ${context || 'Aucune information disponible pour le moment.'}
                 }
             }
 
-            if (bestMatch && maxScore > 0) {
+            if (bestMatch && maxScore >= (userWords.length * 0.4)) {
                 responseText = bestMatch.answer;
             } else {
                 responseText = noInfoMsg;
@@ -100,14 +152,21 @@ ${context || 'Aucune information disponible pour le moment.'}
         }
 
         // 3. Log conversation
+        const isNoInfo = responseText === noInfoMsgAr || responseText === noInfoMsgFr;
+
         await prisma.conversation.create({
             data: {
                 userMessage: message,
                 botResponse: responseText,
+                language: language,
+                isNoInfo: isNoInfo,
             },
         });
 
-        return NextResponse.json({ response: responseText });
+        return NextResponse.json({
+            response: responseText,
+            language: language
+        });
 
     } catch (error: any) {
         console.error('Chat API Error Details:', {
