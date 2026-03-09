@@ -65,11 +65,11 @@ export default function Home() {
               Bâtir le futur numérique de la Mauritanie
             </h2>
             <p className="text-xl mb-10 text-blue-50 font-medium leading-relaxed opacity-90">
-              L'excellence académique au service de l'innovation et de la transformation digitale nationale.
+              L&apos;excellence académique au service de l&apos;innovation et de la transformation digitale nationale.
             </p>
             <div className="flex flex-wrap gap-4">
               <button className="bg-[#c1a052] text-white px-8 py-4 font-black uppercase text-sm tracking-widest hover:bg-white hover:text-[#0b2a51] transition-all flex items-center gap-3">
-                Découvrir l'offre
+                Découvrir l&apos;offre
                 <ChevronRight size={18} />
               </button>
               <button className="bg-transparent border-2 border-white text-white px-8 py-4 font-black uppercase text-sm tracking-widest hover:bg-white hover:text-[#0b2a51] transition-all">
@@ -89,7 +89,7 @@ export default function Home() {
           <span className="text-[#c1a052] opacity-50">•</span>
           <span className="text-white font-bold text-sm">PARTENARIAT AVEC HUAWEI : CERTIFICATIONS DISPONIBLES</span>
           <span className="text-[#c1a052] opacity-50">•</span>
-          <span className="text-white font-bold text-sm underline">CONSULTEZ LES RÉSULTATS D'ADMISSION</span>
+          <span className="text-white font-bold text-sm underline">CONSULTEZ LES RÉSULTATS D&apos;ADMISSION</span>
         </div>
       </div>
 
@@ -104,12 +104,12 @@ export default function Home() {
                 <MissionItem
                   icon={<Award className="text-[#c1a052]" />}
                   title="Diplômes Reconnus"
-                  description="Des formations accréditées et orientées vers les besoins réels du marché de l'emploi technologique."
+                  description="Des formations accréditées et orientées vers les besoins réels du marché de l&apos;emploi technologique."
                 />
                 <MissionItem
                   icon={<Zap className="text-[#c1a052]" />}
                   title="Innovation Technologique"
-                  description="Un environnement d'apprentissage moderne avec des laboratoires de pointe et des projets innovants."
+                  description="Un environnement d&apos;apprentissage moderne avec des laboratoires de pointe et des projets innovants."
                 />
                 <MissionItem
                   icon={<Globe className="text-[#c1a052]" />}
@@ -136,24 +136,47 @@ export default function Home() {
       <section className="py-24 bg-white">
         <div className="container mx-auto px-6">
           <div className="text-center max-w-3xl mx-auto mb-20">
-            <h3 className="text-[#c1a052] text-xs font-black uppercase tracking-[0.4em] mb-4">Pôles d'Excellence</h3>
+            <h3 className="text-[#c1a052] text-xs font-black uppercase tracking-[0.4em] mb-4">Pôles d&apos;Excellence</h3>
             <h2 className="text-4xl font-black text-[#0b2a51]">Des cursus spécialisés pour des experts recherchés</h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {/* Bachelor Programs */}
             <ProgramCard
               title="DSI"
-              subtitle="Développement des Systèmes d'Information"
-              description="Maîtrisez les architectures logicielles, la gestion base de données et l'ingénierie des systèmes complexes."
+              subtitle="Développement des Systèmes Informatiques"
+              description="Création, déploiement et maintenance de systèmes et applications."
             />
             <ProgramCard
               title="RSS"
-              subtitle="Réseaux et Sécurité des Systèmes"
-              description="Devenez expert en protection des infrastructures critiques et en administration des réseaux modernes."
+              subtitle="Réseaux, Systèmes et Sécurité"
+              description="Cybersécurité, administration réseaux et protection d&apos;infrastructures."
             />
             <ProgramCard
-              title="DWM"
-              subtitle="Développement Web et Multimédia"
-              description="Concevez des interfaces immersives et développez des applications web performantes et innovantes."
+              title="CNM"
+              subtitle="Communication Numérique et Multimédia"
+              description="Design graphique, médias interactifs, et stratégies de communication digitale."
+            />
+            <ProgramCard
+              title="ISI"
+              subtitle="Ingénierie des Systèmes Intelligents"
+              description="Conception de systèmes automatisés, intégration logicielle et réseaux de capteurs."
+            />
+            <ProgramCard
+              title="IDS"
+              subtitle="Ingénierie des Données et Statistiques"
+              description="Collecte, traitement avancé et analyse de données massif (Data Science)."
+            />
+
+            {/* Masters */}
+            <ProgramCard
+              title="MS-CYB"
+              subtitle="Master en Cybersécurité"
+              description="Protection avancée des systèmes d&apos;information et détection des menaces complexes."
+            />
+            <ProgramCard
+              title="MS-IA"
+              subtitle="Master en Intelligence Artificielle"
+              description="Machine learning, développement de solutions intelligentes et automatisation."
             />
           </div>
         </div>
@@ -174,7 +197,7 @@ export default function Home() {
                 <span className="font-black text-2xl tracking-tighter">SUPNUM</span>
               </div>
               <p className="text-blue-100/60 text-sm leading-relaxed">
-                Institut supérieur public dont la mission est la formation, la recherche et l'innovation dans le domaine du numérique.
+                Institut supérieur public dont la mission est la formation, la recherche et l&apos;innovation dans le domaine du numérique.
               </p>
             </div>
 

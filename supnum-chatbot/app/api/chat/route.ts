@@ -68,8 +68,8 @@ export async function POST(req: Request) {
 
         const context = faqs.map((f: { question: string; answer: string }) => `Q: ${f.question}\nA: ${f.answer}`).join('\n\n');
 
-        const noInfoMsgAr = "ليس لدي هذه المعلومات. يرجى الاتصال بإدارة SupNum.";
-        const noInfoMsgFr = "Je n'ai pas cette information. Veuillez contacter l'administration de SupNum.";
+        const noInfoMsgAr = "المعلومات المطلوبة غير متوفرة في قاعدة بيانات SUPNUM.";
+        const noInfoMsgFr = "Les informations demandées ne sont pas disponibles dans la base de données SUPNUM.";
         const noInfoMsg = language === 'ar' ? noInfoMsgAr : noInfoMsgFr;
 
         const generalKnowledge = `
@@ -79,7 +79,8 @@ LOCALISATION : Tevragh-Zeina, Nouakchott, Mauritanie.
 CONTACTS : Tél: +222 45 24 45 44 | Email: contact@supnum.mr | Site: supnum.mr
 ADMISSION : Bacheliers séries C ou D, sélection via plateforme nationale.
 FRAIS : Établissement public, les formations sont GRATUITES.
-FILIÈRES : DSI (Développement), RSS (Réseaux & Sécurité), DWM (Développement Web & Multimédia).
+FILIÈRES LICENCE : DSI (Développement des Systèmes Informatiques), RSS (Réseaux, Systèmes et Sécurité), CNM/DWM (Communication Numérique et Multimédia), ISI (Ingénierie des Systèmes Intelligents), IDS (Ingénierie des Données et Statistiques).
+FILIÈRES MASTER : Cybersécurité, Intelligence Artificielle.
 `;
 
         // 2. Prepare System Prompt based on strict rules
@@ -116,8 +117,12 @@ Règles de réponse :
                     temperature: 0,
                 });
                 responseText = completion.choices[0].message?.content || "";
-            } catch (aiError: any) {
-                console.error('AI Error, falling back to keywords:', aiError.message);
+            } catch (aiError: unknown) {
+                if (aiError instanceof Error) {
+                    console.error('AI Error, falling back to keywords:', aiError.message);
+                } else {
+                    console.error('AI Error, falling back to keywords:', aiError);
+                }
             }
         }
 
@@ -168,12 +173,15 @@ Règles de réponse :
             language: language
         });
 
-    } catch (error: any) {
-        console.error('Chat API Error Details:', {
-            message: error.message,
-            stack: error.stack,
-            cause: error.cause
-        });
-        return NextResponse.json({ error: 'Internal Server Error', details: error.message }, { status: 500 });
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            console.error('Chat API Error Details:', {
+                message: error.message,
+                stack: error.stack,
+                cause: error.cause
+            });
+            return NextResponse.json({ error: 'Internal Server Error', details: error.message }, { status: 500 });
+        }
+        return NextResponse.json({ error: 'Internal Server Error', details: 'Unknown error' }, { status: 500 });
     }
 }

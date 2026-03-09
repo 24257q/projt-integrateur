@@ -21,12 +21,21 @@ type Contact = {
     createdAt: string;
 };
 
+type Conversation = {
+    id: number;
+    userMessage: string;
+    botResponse: string | null;
+    language: string;
+    isNoInfo: boolean;
+    createdAt: string;
+};
+
 export default function AdminPage() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [password, setPassword] = useState('');
     const [faqs, setFaqs] = useState<FAQ[]>([]);
     const [contacts, setContacts] = useState<Contact[]>([]);
-    const [conversations, setConversations] = useState<any[]>([]);
+    const [conversations, setConversations] = useState<Conversation[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [activeTab, setActiveTab] = useState<'faq' | 'contact' | 'history'>('faq');
 
