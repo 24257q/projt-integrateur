@@ -1,8 +1,7 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Trash2, Plus, LogOut, BarChart, MessageSquare, Users, Phone, Calendar } from 'lucide-react';
+import { Trash2, Plus, LogOut, BarChart, MessageSquare, Users, Phone, Calendar, Edit2, X } from 'lucide-react';
 
 type FAQ = {
     id: number;
@@ -45,6 +44,7 @@ export default function AdminPage() {
     const [newCategory, setNewCategory] = useState('Général');
     const [newLanguage, setNewLanguage] = useState('fr');
     const [respondingToId, setRespondingToId] = useState<number | null>(null);
+    const [editingId, setEditingId] = useState<number | null>(null);
 
     useEffect(() => {
         if (isAuthenticated) {
@@ -107,43 +107,78 @@ export default function AdminPage() {
         if (!newQuestion || !newAnswer) return;
 
         try {
-            const res = await fetch('/api/faq', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    question: newQuestion,
-                    answer: newAnswer,
-                    category: newCategory,
-                    language: newLanguage,
-                }),
-            });
+            if (editingId) {
+                const res = await fetch('/api/faq', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        id: editingId,
+                        question: newQuestion,
+                        answer: newAnswer,
+                        category: newCategory,
+                        language: newLanguage,
+                    }),
+                });
 
-            if (res.ok) {
-                const created = await res.json();
-                setFaqs([created, ...faqs]);
-
-                // If we were responding to a conversation, mark it as resolved
-                if (respondingToId) {
-                    await fetch('/api/conversations', {
-                        method: 'PATCH',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            id: respondingToId,
-                            botResponse: newAnswer
-                        })
-                    });
-                    setRespondingToId(null);
-                    fetchConversations(); // Refresh history
+                if (res.ok) {
+                    const updated = await res.json();
+                    setFaqs(faqs.map(f => f.id === editingId ? updated : f));
+                    resetForm();
+                    alert('FAQ modifiée avec succès !');
                 }
+            } else {
+                const res = await fetch('/api/faq', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        question: newQuestion,
+                        answer: newAnswer,
+                        category: newCategory,
+                        language: newLanguage,
+                    }),
+                });
 
-                setNewQuestion('');
-                setNewAnswer('');
-                alert('FAQ ajoutée et historique mis à jour !');
+                if (res.ok) {
+                    const created = await res.json();
+                    setFaqs([created, ...faqs]);
+
+                    // If we were responding to a conversation, mark it as resolved
+                    if (respondingToId) {
+                        await fetch('/api/conversations', {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                id: respondingToId,
+                                botResponse: newAnswer
+                            })
+                        });
+                        fetchConversations(); // Refresh history
+                    }
+
+                    resetForm();
+                    alert('FAQ ajoutée et historique mis à jour !');
+                }
             }
         } catch (e) {
             console.error(e);
-            alert('Erreur lors de l\'ajout');
+            alert('Erreur lors de l\'enregistrement');
         }
+    };
+
+    const resetForm = () => {
+        setNewQuestion('');
+        setNewAnswer('');
+        setEditingId(null);
+        setRespondingToId(null);
+    };
+
+    const handleEditFAQ = (faq: FAQ) => {
+        setNewQuestion(faq.question);
+        setNewAnswer(faq.answer);
+        setNewCategory(faq.category);
+        setNewLanguage(faq.language);
+        setEditingId(faq.id);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     const handleDeleteFAQ = async (id: number) => {
@@ -307,11 +342,16 @@ export default function AdminPage() {
                     <div className="space-y-8 animate-fade-in">
                         {/* Add FAQ Form */}
                         <div className="bg-white shadow-sm border border-gray-100 rounded-2xl overflow-hidden">
-                            <div className="px-6 py-4 bg-gray-50/50 border-b border-gray-100">
+                            <div className="px-6 py-4 bg-gray-50/50 border-b border-gray-100 flex justify-between items-center">
                                 <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                                    <Plus size={20} className="text-blue-600" />
-                                    Ajouter une nouvelle question
+                                    {editingId ? <Edit2 size={20} className="text-blue-600" /> : <Plus size={20} className="text-blue-600" />}
+                                    {editingId ? 'Modifier la question' : 'Ajouter une nouvelle question'}
                                 </h3>
+                                {editingId && (
+                                    <button onClick={resetForm} className="text-sm text-gray-500 hover:text-red-500 flex items-center gap-1">
+                                        <X size={16} /> Annuler
+                                    </button>
+                                )}
                             </div>
                             <div className="p-6">
                                 <form onSubmit={handleAddFAQ} className="grid grid-cols-1 gap-6 sm:grid-cols-6">
@@ -320,6 +360,7 @@ export default function AdminPage() {
                                         <input
                                             type="text"
                                             required
+                                            dir="auto"
                                             value={newQuestion}
                                             onChange={(e) => setNewQuestion(e.target.value)}
                                             className="w-full rounded-xl border-gray-200 bg-gray-50 p-3 text-sm focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none border text-gray-900"
@@ -347,6 +388,7 @@ export default function AdminPage() {
                                         <textarea
                                             required
                                             rows={3}
+                                            dir="auto"
                                             value={newAnswer}
                                             onChange={(e) => setNewAnswer(e.target.value)}
                                             className="w-full rounded-xl border-gray-200 bg-gray-50 p-3 text-sm focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none border resize-none text-gray-900"
@@ -371,7 +413,7 @@ export default function AdminPage() {
                                             type="submit"
                                             className="bg-blue-600 text-white font-bold py-3 px-8 rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20"
                                         >
-                                            Enregistrer la FAQ
+                                            {editingId ? 'Mettre à jour la FAQ' : 'Enregistrer la FAQ'}
                                         </button>
                                     </div>
                                 </form>
@@ -403,13 +445,22 @@ export default function AdminPage() {
                                                     <p className="text-base font-bold text-gray-900">{faq.question}</p>
                                                     <p className="text-sm text-gray-600 leading-relaxed max-w-3xl">{faq.answer}</p>
                                                 </div>
-                                                <button
-                                                    onClick={() => handleDeleteFAQ(faq.id)}
-                                                    className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
-                                                    title="Supprimer"
-                                                >
-                                                    <Trash2 size={18} />
-                                                </button>
+                                                <div className="flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                                                    <button
+                                                        onClick={() => handleEditFAQ(faq)}
+                                                        className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                                                        title="Modifier"
+                                                    >
+                                                        <Edit2 size={18} />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDeleteFAQ(faq.id)}
+                                                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                                                        title="Supprimer"
+                                                    >
+                                                        <Trash2 size={18} />
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     ))
@@ -551,13 +602,13 @@ export default function AdminPage() {
                                             <div className="space-y-4">
                                                 <div className="flex gap-4">
                                                     <div className="w-8 h-8 rounded-full bg-blue-100 flex-shrink-0 flex items-center justify-center text-blue-700 text-xs font-bold">U</div>
-                                                    <div className="bg-blue-50/50 rounded-2xl p-4 text-sm text-gray-800 flex-1">
+                                                    <div dir="auto" className="bg-blue-50/50 rounded-2xl p-4 text-sm text-gray-800 flex-1">
                                                         {conv.userMessage}
                                                     </div>
                                                 </div>
                                                 <div className="flex gap-4">
                                                     <div className="w-8 h-8 rounded-full bg-green-100 flex-shrink-0 flex items-center justify-center text-green-700 text-xs font-bold">AI</div>
-                                                    <div className={`rounded-2xl p-4 text-sm flex-1 border italic ${conv.isNoInfo ? 'bg-red-50/50 text-red-700 border-red-100' : 'bg-green-50/50 text-green-700 border-green-100/50'}`}>
+                                                    <div dir="auto" className={`rounded-2xl p-4 text-sm flex-1 border italic ${conv.isNoInfo ? 'bg-red-50/50 text-red-700 border-red-100' : 'bg-green-50/50 text-green-700 border-green-100/50'}`}>
                                                         {conv.botResponse}
                                                     </div>
                                                 </div>

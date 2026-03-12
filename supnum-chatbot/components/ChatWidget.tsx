@@ -294,7 +294,15 @@ export default function ChatWidget() {
                                                     : 'bg-white text-gray-800 border-gray-200 rounded-bl-none shadow-[0_2px_8px_rgba(0,0,0,0.04)]'
                                                     }`}
                                             >
-                                                <p className="whitespace-pre-line">{msg.text}</p>
+                                                <div className="whitespace-pre-line">
+                                                    {msg.text.split(/(!\[[^\]]*\]\([^)]+\))/g).map((part, i) => {
+                                                        const match = part.match(/!\[([^\]]*)\]\(([^)]+)\)/);
+                                                        if (match) {
+                                                            return <img key={i} src={match[2]} alt={match[1]} className="w-full mt-3 mb-1 rounded-lg shadow-sm border border-gray-200" />;
+                                                        }
+                                                        return <span key={i}>{part}</span>;
+                                                    })}
+                                                </div>
                                             </div>
                                             <div className={`flex items-center mt-1 mx-2 gap-2 opacity-0 group-hover:opacity-100 transition-opacity ${msg.type === 'user' ? 'flex-row-reverse' : ''}`}>
                                                 <span className="text-[9px] font-bold text-gray-400 uppercase tracking-tighter">

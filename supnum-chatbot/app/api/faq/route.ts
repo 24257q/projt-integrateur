@@ -51,3 +51,26 @@ export async function DELETE(req: Request) {
         return NextResponse.json({ error: 'Failed to delete FAQ' }, { status: 500 });
     }
 }
+
+// PUT update FAQ
+export async function PUT(req: Request) {
+    try {
+        const body = await req.json();
+        const { id, question, answer, category, language } = body;
+
+        if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
+
+        const updatedFaq = await prisma.fAQ.update({
+            where: { id: Number(id) },
+            data: {
+                question,
+                answer,
+                category,
+                language,
+            },
+        });
+        return NextResponse.json(updatedFaq);
+    } catch (error) {
+        return NextResponse.json({ error: 'Failed to update FAQ' }, { status: 500 });
+    }
+}

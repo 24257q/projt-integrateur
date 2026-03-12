@@ -14,11 +14,29 @@ const getOpenAIClient = () => {
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { message } = body;
+        let { message } = body;
 
         // Automatic Language Detection
         const hasArabic = /[\u0600-\u06FF]/.test(message);
         const language = hasArabic ? 'ar' : 'fr';
+
+        if (typeof message === 'string') {
+            if (language === 'fr') {
+                message = message.replace(/\bs1\b/gi, 'semestre 1');
+                message = message.replace(/\bs2\b/gi, 'semestre 2');
+                message = message.replace(/\bs3\b/gi, 'semestre 3');
+                message = message.replace(/\bs4\b/gi, 'semestre 4');
+                message = message.replace(/\bs5\b/gi, 'semestre 5');
+                message = message.replace(/\bs6\b/gi, 'semestre 6');
+            } else {
+                message = message.replace(/\bs1\b/gi, 'الفصل الأول');
+                message = message.replace(/\bs2\b/gi, 'الفصل الثاني');
+                message = message.replace(/\bs3\b/gi, 'الفصل الثالث');
+                message = message.replace(/\bs4\b/gi, 'الفصل الرابع');
+                message = message.replace(/\bs5\b/gi, 'الفصل الخامس');
+                message = message.replace(/\bs6\b/gi, 'الفصل السادس');
+            }
+        }
 
         const greetings = ['hello', 'hi', 'bonjour', 'salut', 'coucou', 'مرحبا', 'أهلا', 'السلام عليكم', 'سلام'];
         const lowerMessage = message.toLowerCase().trim();
@@ -128,18 +146,23 @@ Règles de réponse :
 
         // Fallback logic if AI failed or client not available
         if (!responseText) {
-            // Robust keyword matching
-            const userWords = message.toLowerCase()
-                .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?'"]/g, " ")
+            // Function to normalize string: remove accents and punctuation
+            const normalizeString = (str: string) => {
+                return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                    .toLowerCase()
+                    .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?'"]/g, " ");
+            };
+
+            const userWords = normalizeString(message)
                 .split(' ')
-                .filter((w: string) => w.length > 1);
+                .filter((w: string) => w.length > 1 || /^\d$/.test(w));
 
             let bestMatch = null;
             let maxScore = 0;
 
             for (const faq of faqs) {
                 let score = 0;
-                const questionWords = faq.question.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?'"]/g, " ");
+                const questionWords = normalizeString(faq.question);
                 for (const word of userWords) {
                     if (questionWords.includes(word)) score++;
                 }

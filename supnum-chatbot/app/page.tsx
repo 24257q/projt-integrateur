@@ -1,5 +1,6 @@
 
 import Image from 'next/image';
+import Link from 'next/link';
 import ChatWidget from '@/components/ChatWidget';
 import { ArrowRight, BookOpen, GraduationCap, Headphones, HelpCircle, MapPin, Sparkles, Star, Users, CheckCircle, Globe, Award, Zap, ChevronRight, Mail, Phone as PhoneIcon } from 'lucide-react';
 
@@ -15,9 +16,6 @@ export default function Home() {
             <span className="flex items-center gap-2 pt-0.5"><Mail size={12} className="text-blue-400" /> contact@supnum.mr</span>
           </div>
           <div className="flex gap-4">
-            <a href="#" className="hover:text-blue-300 transition-colors">Portail Étudiant</a>
-            <span className="text-gray-500">|</span>
-            <a href="#" className="hover:text-blue-300 transition-colors">Espace Parent</a>
           </div>
         </div>
       </div>
@@ -36,11 +34,10 @@ export default function Home() {
           </div>
 
           <nav className="hidden lg:flex gap-8 text-[#0b2a51] font-bold text-sm uppercase">
-            <a href="#" className="hover:text-[#c1a052] transition-colors border-b-2 border-transparent hover:border-[#c1a052] pb-1">Accueil</a>
-            <a href="#" className="hover:text-[#c1a052] transition-colors border-b-2 border-transparent hover:border-[#c1a052] pb-1">Formations</a>
-            <a href="#" className="hover:text-[#c1a052] transition-colors border-b-2 border-transparent hover:border-[#c1a052] pb-1">Recherche</a>
-            <a href="#" className="hover:text-[#c1a052] transition-colors border-b-2 border-transparent hover:border-[#c1a052] pb-1">Institut</a>
-            <a href="/admin" className="text-white bg-[#0b2a51] px-4 py-2 rounded shadow-lg hover:bg-[#c1a052] transition-all">Administration</a>
+            <Link href="/" className="hover:text-[#c1a052] transition-colors border-b-2 border-transparent hover:border-[#c1a052] pb-1">Accueil</Link>
+            <a href="#formations" className="hover:text-[#c1a052] transition-colors border-b-2 border-transparent hover:border-[#c1a052] pb-1">Formations</a>
+            <Link href="/institut" className="hover:text-[#c1a052] transition-colors border-b-2 border-transparent hover:border-[#c1a052] pb-1">Institut</Link>
+            <Link href="/admin" className="text-white bg-[#0b2a51] px-4 py-2 rounded shadow-lg hover:bg-[#c1a052] transition-all">Administration</Link>
           </nav>
         </div>
       </header>
@@ -68,30 +65,13 @@ export default function Home() {
               L&apos;excellence académique au service de l&apos;innovation et de la transformation digitale nationale.
             </p>
             <div className="flex flex-wrap gap-4">
-              <button className="bg-[#c1a052] text-white px-8 py-4 font-black uppercase text-sm tracking-widest hover:bg-white hover:text-[#0b2a51] transition-all flex items-center gap-3">
-                Découvrir l&apos;offre
-                <ChevronRight size={18} />
-              </button>
-              <button className="bg-transparent border-2 border-white text-white px-8 py-4 font-black uppercase text-sm tracking-widest hover:bg-white hover:text-[#0b2a51] transition-all">
-                Nous contacter
-              </button>
             </div>
           </div>
         </div>
       </section>
 
       {/* News Banner */}
-      <div className="bg-[#0b2a51] py-4 overflow-hidden relative border-y-4 border-[#c1a052]">
-        <div className="flex items-center gap-8 whitespace-nowrap animate-marquee">
-          <span className="text-white font-bold text-sm flex items-center gap-2"><Sparkles className="text-[#c1a052]" size={16} /> INSCRIPTIONS 2024 OUVERTES !</span>
-          <span className="text-[#c1a052] opacity-50">•</span>
-          <span className="text-white font-bold text-sm">NOUVEAU MASTER EN CYBERSÉCURITÉ</span>
-          <span className="text-[#c1a052] opacity-50">•</span>
-          <span className="text-white font-bold text-sm">PARTENARIAT AVEC HUAWEI : CERTIFICATIONS DISPONIBLES</span>
-          <span className="text-[#c1a052] opacity-50">•</span>
-          <span className="text-white font-bold text-sm underline">CONSULTEZ LES RÉSULTATS D&apos;ADMISSION</span>
-        </div>
-      </div>
+
 
       {/* Mission Section */}
       <section className="py-24 bg-gray-50 border-b border-gray-200">
@@ -133,7 +113,7 @@ export default function Home() {
       </section>
 
       {/* Features Grid (Refined) */}
-      <section className="py-24 bg-white">
+      <section id="formations" className="py-24 bg-white">
         <div className="container mx-auto px-6">
           <div className="text-center max-w-3xl mx-auto mb-20">
             <h3 className="text-[#c1a052] text-xs font-black uppercase tracking-[0.4em] mb-4">Pôles d&apos;Excellence</h3>
@@ -143,23 +123,27 @@ export default function Home() {
             {/* Bachelor Programs */}
             <ProgramCard
               title="DSI"
-              subtitle="Développement des Systèmes Informatiques"
+              subtitle="Développement des Systèmes d'Information"
               description="Création, déploiement et maintenance de systèmes et applications."
+              href="/formations/developpement-des-systemes-dinformation"
             />
             <ProgramCard
               title="RSS"
               subtitle="Réseaux, Systèmes et Sécurité"
-              description="Cybersécurité, administration réseaux et protection d&apos;infrastructures."
+              description="Cybersécurité, administration réseaux et protection d'infrastructures."
+              href="/formations/reseaux-systemes-et-securite"
             />
             <ProgramCard
-              title="CNM"
-              subtitle="Communication Numérique et Multimédia"
+              title="DWM"
+              subtitle="Développement Web et Multimédia"
               description="Design graphique, médias interactifs, et stratégies de communication digitale."
+              href="/formations/developpement-web-et-multimedia"
             />
             <ProgramCard
-              title="ISI"
-              subtitle="Ingénierie des Systèmes Intelligents"
+              title="ISCA"
+              subtitle="Ingénierie des Systèmes Connectés et Autonomes"
               description="Conception de systèmes automatisés, intégration logicielle et réseaux de capteurs."
+              href="/formations/ingenierie-des-systemes-connectes-et-autonomes"
             />
             <ProgramCard
               title="IDS"
@@ -234,12 +218,8 @@ export default function Home() {
           </div>
 
           <div className="pt-12 border-t border-white/10 flex flex-col md:row justify-between items-center gap-6">
-            <span className="text-white/40 text-xs font-bold uppercase tracking-widest">© 2024 Institut Supérieur du Numérique. Tous droits réservés.</span>
-            <div className="flex gap-6 opacity-60 grayscale">
-              <div className="w-8 h-8 flex items-center justify-center">FB</div>
-              <div className="w-8 h-8 flex items-center justify-center">LN</div>
-              <div className="w-8 h-8 flex items-center justify-center">TW</div>
-            </div>
+            <span className="text-white/40 text-xs font-bold uppercase tracking-widest">© 2026 Institut Supérieur du Numérique. Tous droits réservés.</span>
+
           </div>
         </div>
       </footer>
@@ -261,19 +241,31 @@ function MissionItem({ icon, title, description }: { icon: React.ReactNode, titl
   );
 }
 
-function ProgramCard({ title, subtitle, description }: { title: string, subtitle: string, description: string }) {
-  return (
-    <div className="p-10 bg-white border-2 border-gray-100 rounded-[2rem] hover:border-[#c1a052] transition-all hover:translate-y-[-10px] shadow-sm hover:shadow-2xl group">
+function ProgramCard({ title, subtitle, description, href }: { title: string, subtitle: string, description: string, href?: string }) {
+  const content = (
+    <div className={`p-10 bg-white border-2 border-gray-100 rounded-[2rem] hover:border-[#c1a052] transition-all hover:translate-y-[-10px] shadow-sm hover:shadow-2xl group flex flex-col h-full`}>
       <div className="w-16 h-16 bg-[#0b2a51] text-white flex items-center justify-center rounded-2xl font-black text-2xl mb-8 group-hover:bg-[#c1a052] transition-colors">
         {title}
       </div>
       <h4 className="text-gray-900 font-black text-xl mb-2">{subtitle}</h4>
-      <p className="text-gray-500 text-sm leading-relaxed">
+      <p className="text-gray-500 text-sm leading-relaxed mb-6 flex-grow">
         {description}
       </p>
-      <div className="mt-8 pt-6 border-t border-gray-50 flex items-center gap-2 text-[#0b2a51] font-black text-xs uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
-        Voir le programme <ArrowRight size={14} />
-      </div>
+      {href && (
+        <div className="flex items-center text-[#0b2a51] font-bold text-sm uppercase tracking-wider group-hover:text-[#c1a052] transition-colors mt-auto">
+          En savoir plus <ChevronRight size={16} className="ml-1 group-hover:translate-x-1 transition-transform" />
+        </div>
+      )}
     </div>
   );
+
+  if (href) {
+    return (
+      <Link href={href} className="block h-full">
+        {content}
+      </Link>
+    );
+  }
+
+  return <div className="h-full">{content}</div>;
 }
