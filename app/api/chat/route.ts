@@ -1,0 +1,210 @@
+import { NextResponse } from 'next/server';
+import prisma from '@/lib/prisma';
+import OpenAI from 'openai';
+
+const getOpenAIClient = () => {
+    const apiKey = process.env.GROK_API_KEY;
+    if (!apiKey || apiKey === '' || apiKey.includes('your_xai_api_key')) return null;
+    return new OpenAI({
+        apiKey: apiKey,
+        baseURL: 'https://api.x.ai/v1',
+    });
+};
+
+export async function POST(req: Request) {
+    try {
+        const body = await req.json();
+        let { message } = body;
+
+        // Automatic Language Detection
+        const hasArabic = /[\u0600-\u06FF]/.test(message);
+        const language = hasArabic ? 'ar' : 'fr';
+
+        if (typeof message === 'string') {
+            if (language === 'fr') {
+                message = message.replace(/\bs1\b/gi, 'semestre 1');
+                message = message.replace(/\bs2\b/gi, 'semestre 2');
+                message = message.replace(/\bs3\b/gi, 'semestre 3');
+                message = message.replace(/\bs4\b/gi, 'semestre 4');
+                message = message.replace(/\bs5\b/gi, 'semestre 5');
+                message = message.replace(/\bs6\b/gi, 'semestre 6');
+            } else {
+                message = message.replace(/\bs1\b/gi, 'الفصل الأول');
+                message = message.replace(/\bs2\b/gi, 'الفصل الثاني');
+                message = message.replace(/\bs3\b/gi, 'الفصل الثالث');
+                message = message.replace(/\bs4\b/gi, 'الفصل الرابع');
+                message = message.replace(/\bs5\b/gi, 'الفصل الخامس');
+                message = message.replace(/\bs6\b/gi, 'الفصل السادس');
+            }
+        }
+
+        const greetings = ['hello', 'hi', 'bonjour', 'salut', 'coucou', 'مرحبا', 'أهلا', 'السلام عليكم', 'سلام'];
+        const lowerMessage = message.toLowerCase().trim();
+
+        if (greetings.some(g => lowerMessage === g || lowerMessage === g + ' !' || lowerMessage === g + '?')) {
+            const funnyResponsesFr = [
+                "Salut ! 👋 Prêt à devenir le prochain génie du numérique en Mauritanie ? Je suis là pour t'aider !",
+                "Bonjour ! Si j'avais des mains, je te ferais un high-five ✋. En attendant, que puis-je faire pour toi ?",
+                "Salut ! Je suis en pleine forme numérique aujourd'hui. Et toi, prêt à coder le futur ? 🤖"
+            ];
+            const funnyResponsesAr = [
+                "أهلاً بك! 👋 هل أنت مستعد لتكون العبقري الرقمي القادم في موريتانيا؟ أنا هنا لمساعدتك!",
+                "مرحباً! لو كان لدي يدان لصافحتك ✋. كيف يمكنني مساعدتك اليوم؟",
+                "أهلاً! أنا في قمة نشاطي الرقمي اليوم. هل أنت مستعد لبرمجة المستقبل؟ 🤖"
+            ];
+
+            const responses = language === 'ar' ? funnyResponsesAr : funnyResponsesFr;
+            const responseText = responses[Math.floor(Math.random() * responses.length)];
+
+            // Log the funny greeting too
+            await prisma.conversation.create({
+                data: {
+                    userMessage: message,
+                    botResponse: responseText,
+                    language: language,
+                    isNoInfo: false,
+                },
+            });
+
+            return NextResponse.json({ response: responseText, language });
+        }
+
+        console.log('Chat API Request:', { message, language });
+
+        if (!message) {
+            return NextResponse.json({ error: 'Message required' }, { status: 400 });
+        }
+
+        // 1. Fetch relevant FAQs from Database for Context
+        console.log('Fetching FAQs for language:', language);
+        const faqs = await prisma.fAQ.findMany({
+            where: {
+                language: language,
+            },
+        });
+        console.log('FAQs fetched. Count:', faqs.length);
+
+        const context = faqs.map((f: { question: string; answer: string }) => `Q: ${f.question}\nA: ${f.answer}`).join('\n\n');
+
+        const noInfoMsgAr = "المعلومات المطلوبة غير متوفرة في قاعدة بيانات SUPNUM.";
+        const noInfoMsgFr = "Les informations demandées ne sont pas disponibles dans la base de données SUPNUM.";
+        const noInfoMsg = language === 'ar' ? noInfoMsgAr : noInfoMsgFr;
+
+        const generalKnowledge = `
+IDENTITÉ : Institut Supérieur du Numérique (SupNum).
+MISSION : Former des experts en numérique (Développement, Réseaux, Sécurité, Multimédia).
+LOCALISATION : Tevragh-Zeina, Nouakchott, Mauritanie.
+CONTACTS : Tél: +222 45 24 45 44 | Email: contact@supnum.mr | Site: supnum.mr
+ADMISSION : Bacheliers séries C ou D, sélection via plateforme nationale.
+FRAIS : Établissement public, les formations sont GRATUITES.
+FILIÈRES LICENCE : DSI (Développement des Systèmes Informatiques), RSS (Réseaux, Systèmes et Sécurité), CNM/DWM (Communication Numérique et Multimédia), ISI (Ingénierie des Systèmes Intelligents), IDS (Ingénierie des Données et Statistiques).
+FILIÈRES MASTER : Cybersécurité, Intelligence Artificielle.
+`;
+
+        // 2. Prepare System Prompt based on strict rules
+        const systemPrompt = `
+Tu es l'assistant IA officiel de SupNum. 
+Utilise les informations suivantes pour répondre :
+
+CONNAISSANCES GÉNÉRALES :
+${generalKnowledge}
+
+CONTEXTE DÉTAILLÉ (FAQ) :
+${context || 'Pas de questions spécifiques trouvées.'}
+
+Règles de réponse :
+1. Utilise d'abord le CONTEXTE DÉTAILLÉ pour répondre précisément.
+2. Si la réponse n'est pas dans le contexte détaillé, utilise les CONNAISSANCES GÉNÉRALES.
+3. Si l'information est totalement absente des deux, réponds UNIQUEMENT : "${noInfoMsg}"
+4. Réponds toujours en ${language === 'ar' ? 'Arabe' : 'Français'}.
+5. Ne mentionne pas de dates de concours sauf si spécifiées dans le contexte.
+6. Sois professionnel, accueillant et institutionnel.
+`;
+
+        let responseText = "";
+        const openai = getOpenAIClient();
+
+        if (openai) {
+            try {
+                const completion = await openai.chat.completions.create({
+                    model: 'grok-beta',
+                    messages: [
+                        { role: 'system', content: systemPrompt },
+                        { role: 'user', content: message }
+                    ],
+                    temperature: 0,
+                });
+                responseText = completion.choices[0].message?.content || "";
+            } catch (aiError: unknown) {
+                if (aiError instanceof Error) {
+                    console.error('AI Error, falling back to keywords:', aiError.message);
+                } else {
+                    console.error('AI Error, falling back to keywords:', aiError);
+                }
+            }
+        }
+
+        // Fallback logic if AI failed or client not available
+        if (!responseText) {
+            // Function to normalize string: remove accents and punctuation
+            const normalizeString = (str: string) => {
+                return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                    .toLowerCase()
+                    .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?'"]/g, " ");
+            };
+
+            const userWords = normalizeString(message)
+                .split(' ')
+                .filter((w: string) => w.length > 1 || /^\d$/.test(w));
+
+            let bestMatch = null;
+            let maxScore = 0;
+
+            for (const faq of faqs) {
+                let score = 0;
+                const questionWords = normalizeString(faq.question);
+                for (const word of userWords) {
+                    if (questionWords.includes(word)) score++;
+                }
+                if (score > maxScore) {
+                    maxScore = score;
+                    bestMatch = faq;
+                }
+            }
+
+            if (bestMatch && maxScore >= (userWords.length * 0.4)) {
+                responseText = bestMatch.answer;
+            } else {
+                responseText = noInfoMsg;
+            }
+        }
+
+        // 3. Log conversation
+        const isNoInfo = responseText === noInfoMsgAr || responseText === noInfoMsgFr;
+
+        await prisma.conversation.create({
+            data: {
+                userMessage: message,
+                botResponse: responseText,
+                language: language,
+                isNoInfo: isNoInfo,
+            },
+        });
+
+        return NextResponse.json({
+            response: responseText,
+            language: language
+        });
+
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            console.error('Chat API Error Details:', {
+                message: error.message,
+                stack: error.stack,
+                cause: error.cause
+            });
+            return NextResponse.json({ error: 'Internal Server Error', details: error.message }, { status: 500 });
+        }
+        return NextResponse.json({ error: 'Internal Server Error', details: 'Unknown error' }, { status: 500 });
+    }
+}
